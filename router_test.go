@@ -1,7 +1,6 @@
 package gocommons
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -18,21 +17,18 @@ func Test_Router(t *testing.T) {
 	for i := 0; i < parallelism; i++ {
 		j := i
 		callback := func(x Integer) {
-			fmt.Println("got ", x)
 			count[j]++
 		}
 		router.Subscribe(callback)
 	}
 
-	fmt.Println("before sending")
 	for i := 0; i < 10; i++ {
 		router.Route(Integer(i))
 	}
 	router.Close()
 	for i := 0; i < 5; i++ {
-
 		if count[i] != 2 {
-			t.Error("not as expected")
+			t.Error("count in each shard should be 2")
 			t.Fail()
 		}
 	}
