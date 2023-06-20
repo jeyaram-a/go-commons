@@ -10,7 +10,7 @@ func (x Integer) Hash() uint32 {
 	return uint32(x % 5)
 }
 
-func Test_Router(t *testing.T) {
+func TestRouter(t *testing.T) {
 	parallelism := 5
 	router := NewRouter[Integer](uint32(parallelism))
 	count := []int{0, 0, 0, 0, 0}
@@ -32,5 +32,30 @@ func Test_Router(t *testing.T) {
 			t.Fail()
 		}
 	}
+}
 
+func TestRouterShouldPanicOnSendingToClosed(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("sending to closed router should panic")
+			t.Fail()
+		}
+	}()
+	parallelism := 5
+	router := NewRouter[Integer](uint32(parallelism))
+	router.Close()
+	router.Route(Integer(6))
+}
+
+func TestRouterShouldPanicOnClosingToClosed(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("sending to closed router should panic")
+			t.Fail()
+		}
+	}()
+	parallelism := 5
+	router := NewRouter[Integer](uint32(parallelism))
+	router.Close()
+	router.Close()
 }
