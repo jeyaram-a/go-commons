@@ -40,12 +40,14 @@ func NewTransformer[T any, R any](parallelism uint, inArr []T, transformFunc fun
 
 // Applies the tranform func for each element in input slice.
 // Blocks until all transformation are completed
-func (transformer *Transformer[T, R]) Transform() []R {
+func (transformer *Transformer[T, R]) Transform(filter func(R) bool) []R {
 	collected := make([]R, 0)
 
 	go func() {
 		for outElement := range transformer.out {
-			collected = append(collected, outElement)
+			if filter == nil || filter(outElement) {
+				collected = append(collected, outElement)
+			}
 		}
 
 	}()
