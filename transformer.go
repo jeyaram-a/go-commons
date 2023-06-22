@@ -14,7 +14,7 @@ type Transformer[T any, R any] struct {
 	wg          *sync.WaitGroup
 }
 
-func NewTransformer[T any, R any](parallelism uint, inArr []T, transformFunc func(T) R) *Transformer[T, R] {
+func NewTransformer[T any, R any](parallelism uint, inArr []T, transformFunc func(T) (R, error)) *Transformer[T, R] {
 	in := make(chan T)
 	out := make(chan R)
 	var wg sync.WaitGroup
@@ -23,7 +23,10 @@ func NewTransformer[T any, R any](parallelism uint, inArr []T, transformFunc fun
 		wg.Add(1)
 		go func() {
 			for t := range in {
-				out <- transformFunc(t)
+				result, err := transformFunc(t)
+				if err == nil {
+					out <- result
+				}
 			}
 			wg.Done()
 		}()

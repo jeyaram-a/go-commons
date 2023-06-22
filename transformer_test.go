@@ -15,8 +15,8 @@ func contains(haystack []int, needle int) bool {
 
 func TestTransformer(t *testing.T) {
 	inArr := []int{1, 2, 3, 4, 5}
-	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) int {
-		return x * 10
+	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
+		return x * 10, nil
 	})
 	out := transformer.Transform(nil)
 	for _, x := range inArr {
@@ -30,8 +30,8 @@ func TestTransformer(t *testing.T) {
 
 func TestTransformerWithFilter(t *testing.T) {
 	inArr := []int{1, 2, 3, 4, 5}
-	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) int {
-		return x * 10
+	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
+		return x * 10, nil
 	})
 	out := transformer.Transform(func(x int) bool {
 		return x%20 == 0
@@ -47,8 +47,8 @@ func TestTransformerWithFilter(t *testing.T) {
 
 func TestTransformerWithEmpty(t *testing.T) {
 	inArr := []int{}
-	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) int {
-		return x * 10
+	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
+		return x * 10, nil
 	})
 	out := transformer.Transform(nil)
 	for _, x := range inArr {
