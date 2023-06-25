@@ -33,8 +33,11 @@ func TestTransformerWithFilter(t *testing.T) {
 	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
 		return x * 10, nil
 	})
-	out := transformer.Transform(func(x int) bool {
-		return x%20 == 0
+	out := transformer.Transform(func(x Result[int]) bool {
+		if x.Err != nil {
+			return false
+		}
+		return x.ReturnVal%20 == 0
 	})
 	for _, x := range out {
 		if x%20 != 0 {
