@@ -37,7 +37,7 @@ type Hashable interface {
 type Router[T Hashable] struct {
 	subscriptionIndex int
 	parallelism       uint32
-	routes            []chan T
+	Routes            []chan T
 	wg                *sync.WaitGroup
 	closed            bool
 }
@@ -52,9 +52,13 @@ func NewRouter[T Hashable](parallelism uint32) *Router[T] {
 	return &Router[T]{
 		subscriptionIndex: 0,
 		parallelism:       parallelism,
-		routes:            routes,
+		Routes:            routes,
 		wg:                &sync.WaitGroup{},
 	}
+}
+
+func (router *Router[T]) Parallelism() int {
+	return int(router.parallelism)
 }
 
 // Routes the input to the designated route
@@ -63,7 +67,7 @@ func (router *Router[T]) Route(in T) {
 		panic("sending to a closed router")
 	}
 	index := in.Hash() % router.parallelism
-	router.routes[index] <- in
+	router.Routes[index] <- in
 }
 
 // Subscribe a callback for one of the routes.
@@ -75,7 +79,7 @@ func (router *Router[T]) Subscribe(callback func(in T)) {
 	routerIndex := router.subscriptionIndex
 	router.wg.Add(1)
 	go func() {
-		for input := range router.routes[routerIndex] {
+		for input := range router.Routes[routerIndex] {
 			callback(input)
 		}
 		router.wg.Done()
@@ -89,7 +93,7 @@ func (router *Router[T]) Close() {
 		panic("closing an already closed router")
 	}
 	router.closed = true
-	for _, route := range router.routes {
+	for _, route := range router.Routes {
 		close(route)
 	}
 	router.wg.Wait()

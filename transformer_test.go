@@ -18,9 +18,13 @@ func TestTransformer(t *testing.T) {
 	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
 		return x * 10, nil
 	})
-	out := transformer.Transform(nil)
+	job := transformer.Transform(nil)
+	out := job.Get()
 	for _, x := range inArr {
-		if !contains(out, x*10) {
+		results := Map_[Result[int]](out, func(o Result[int]) int {
+			return o.ReturnVal
+		})
+		if !contains(results, x*10) {
 			t.Errorf("%d missing ", (x * 10))
 			t.Fail()
 		}
@@ -33,13 +37,17 @@ func TestTransformerWithFilter(t *testing.T) {
 	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
 		return x * 10, nil
 	})
-	out := transformer.Transform(func(x Result[int]) bool {
+	job := transformer.Transform(func(x Result[int]) bool {
 		if x.Err != nil {
 			return false
 		}
 		return x.ReturnVal%20 == 0
 	})
-	for _, x := range out {
+	out := job.Get()
+	results := Map_[Result[int]](out, func(o Result[int]) int {
+		return o.ReturnVal
+	})
+	for _, x := range results {
 		if x%20 != 0 {
 			t.Errorf("%d missing ", (x * 10))
 			t.Fail()
@@ -53,9 +61,13 @@ func TestTransformerWithEmpty(t *testing.T) {
 	transformer := NewTransformer[int, int](uint(4), inArr, func(x int) (int, error) {
 		return x * 10, nil
 	})
-	out := transformer.Transform(nil)
+	job := transformer.Transform(nil)
+	out := job.Get()
+	results := Map_[Result[int]](out, func(o Result[int]) int {
+		return o.ReturnVal
+	})
 	for _, x := range inArr {
-		if !contains(out, x*10) {
+		if !contains(results, x*10) {
 			t.Errorf("%d missing ", (x * 10))
 			t.Fail()
 		}
